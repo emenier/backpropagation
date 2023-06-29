@@ -56,11 +56,15 @@ class Identity():
 ```python
 class Linear():
 
-    def __init__(self,d_in,d_out,act = Sigmoid(),init=1):
+    def __init__(self,d_in,d_out,act = Sigmoid(),init=1, beta = 0.9):
         self.d_in, self.d_out = d_in, d_out
         self.w = init * np.random.randn(d_in*d_out).reshape(d_in,d_out)
         self.b = init * np.random.randn(1,d_out)
         self.act = act
+        
+        self.beta = beta
+        self.ema_w = 0.
+        self.ema_b = 0.
         
     def __call__(self,x):
         self.x = x # Remember input for backprop
@@ -94,9 +98,11 @@ class Linear():
         return np.stack([np.roll(line,i*self.d_in) for i in range(self.d_out)])
     
     def gradient_step(self,lr,wd=0.):
+        self.ema_w = self.beta * self.ema_w + (1-self.beta) * (self.dl_dw + wd * self.w)
+        self.ema_b = self.beta * self.ema_b + (1-self.beta) * (self.dl_db + wd * self.b)
         
-        self.w = self.w - lr * (self.dl_dw + wd * self.w)
-        self.b = self.b - lr * (self.dl_db + wd * self.b)
+        self.w = self.w - lr * self.ema_w
+        self.b = self.b - lr * self.ema_b
 ```
 
 
@@ -145,8 +151,6 @@ class MSELoss():
 
 ```python
 x = np.random.uniform(0.,1.,size=100).reshape(-1,1)
-#y = 10*np.sin(2*np.pi*x) + 3
-#y = 10*(-x**2+10*x)
 y = 10*x +3
 sizes = [1,64,128,64,1]
 lossfunc = MSELoss()
@@ -171,7 +175,7 @@ for i in pbar:
     pbar.set_description('Loss : {:.3e}'.format(loss))
 ```
 
-    Loss : 1.157e-01: 100%|██████████| 75/75 [02:13<00:00,  1.78s/it]
+    Loss : 3.519e-02: 100%|██████████| 75/75 [02:01<00:00,  1.62s/it]
 
 
 
@@ -208,8 +212,6 @@ fig.suptitle('Slow to learn',fontsize=15)
 
 ```python
 x = np.random.uniform(0.,1.,size=100).reshape(-1,1)
-#y = 10*np.sin(2*np.pi*x) + 3
-#y = 10*(-x**2+10*x)
 y = 10*x +3
 sizes = [1,64,128,64,1]
 lossfunc = MSELoss()
@@ -234,7 +236,7 @@ for i in pbar:
     pbar.set_description('Loss : {:.3e}'.format(loss))
 ```
 
-    Loss : 5.876e-03: 100%|██████████| 75/75 [02:22<00:00,  1.90s/it]
+    Loss : 8.435e-03: 100%|██████████| 75/75 [02:02<00:00,  1.63s/it]
 
 
 
@@ -266,6 +268,67 @@ fig.suptitle('Almost as good as linear regression :D',fontsize=15)
     
 
 
+## Non Linear case
+
+
+```python
+x = np.random.uniform(0.,1.,size=100).reshape(-1,1)
+y = 10*(-x**2+x)
+sizes = [1,64,128,64,1]
+lossfunc = MSELoss()
+network = MLP(sizes,act=ReLU(),init=1e-4)
+lr = 1e-3
+wd = 1e-4
+losses = []
+batch_size = 50
+```
+
+
+```python
+pbar = tqdm(range(500))
+for i in pbar:
+    for j in range(int(x.shape[0]/batch_size)):
+        x_j, y_j = x[j*batch_size:(j+1)*batch_size], y[j*batch_size:(j+1)*batch_size]
+        out = network(x_j)
+        loss, adjoint_state = lossfunc(out,y_j)
+        network.backpropagate(out,adjoint_state)
+        network.gradient_step(lr,wd)
+        losses.append(loss)
+    pbar.set_description('Loss : {:.3e}'.format(loss))
+```
+
+    Loss : 1.301e-02: 100%|██████████| 500/500 [13:14<00:00,  1.59s/it]
+
+
+
+```python
+out = network(x)
+fig, axs= plt.subplots(ncols=2,figsize=(10,4))
+plt.sca(axs[0])
+plt.semilogy(losses)
+plt.title('Losses')
+plt.sca(axs[1])
+plt.title('Training Performance')
+
+plt.scatter(x,y,label='Data')
+plt.scatter(x,out,label='Prediction')
+plt.legend()
+fig.suptitle('Almost as good as linear regression :D',fontsize=15)
+```
+
+
+
+
+    Text(0.5, 0.98, 'Almost as good as linear regression :D')
+
+
+
+
+    
+![png](backpropagation_numpy_files/backpropagation_numpy_19_1.png)
+    
+
+
 ## Creating Readme
 
 
@@ -278,10 +341,26 @@ IPython.notebook.save_notebook()
 ```python
 os.system('rm backpropagation_numpy_files/*')
 os.system('jupyter nbconvert --to markdown backpropagation_numpy.ipynb')
-os.system('mv manifold_identification.md README.md')
+os.system('mv backpropagation_numpy.md README.md')
 os.system('git add backpropagation_numpy_files/')
 
 ```
+
+    [NbConvertApp] WARNING | Config option `kernel_spec_manager_class` not recognized by `NbConvertApp`.
+    [NbConvertApp] Converting notebook backpropagation_numpy.ipynb to markdown
+    [NbConvertApp] Support files will be in backpropagation_numpy_files/
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Writing 8078 bytes to backpropagation_numpy.md
+
+
+
+
+
+    0
+
+
 
 
 ```python
