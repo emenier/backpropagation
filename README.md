@@ -144,9 +144,6 @@ class Linear():
         self.d_in, self.d_out = d_in, d_out
         self.w = init * np.random.randn(d_in*d_out).reshape(d_in,d_out)
         self.b = init * np.random.randn(1,d_out)
-        #x=np.sqrt(6/(d_in+d_out))
-        #self.w = init * np.random.uniform(-x,x,size=d_in*d_out).reshape(d_in,d_out)
-        #self.b = np.zeros((1,d_out))
         self.act = act
         
         self.beta = beta
@@ -436,7 +433,6 @@ fig.suptitle('Almost as good as linear regression :D',fontsize=15)
 dx = 100
 x = np.meshgrid(np.linspace(0,2*np.pi,dx),np.linspace(0,2*np.pi,dx))
 x = np.concatenate([x_i.reshape(1,-1) for x_i in x]).T
-#y = 1/(1+0.1*np.sqrt((x[:,0]-np.pi)**2 + (x[:,1]-np.pi)**2)); y = 10*y.reshape(-1,1)
 radius = np.sqrt((x[:,0]-np.pi)**2+(x[:,1]-np.pi)**2)
 y = 10*(-radius**2+radius).reshape(-1,1)
 
@@ -532,6 +528,24 @@ os.system('mv backpropagation_numpy.md README.md')
 os.system('git add backpropagation_numpy_files/')
 
 ```
+
+    [NbConvertApp] WARNING | Config option `kernel_spec_manager_class` not recognized by `NbConvertApp`.
+    [NbConvertApp] Converting notebook backpropagation_numpy.ipynb to markdown
+    [NbConvertApp] Support files will be in backpropagation_numpy_files/
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Making directory backpropagation_numpy_files
+    [NbConvertApp] Writing 13665 bytes to backpropagation_numpy.md
+
+
+
+
+
+    0
+
+
 
 
 ```python
