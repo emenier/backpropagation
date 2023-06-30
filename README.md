@@ -85,7 +85,7 @@ Basic activation functions $\sigma$ are implemented, as well as their jacobian $
 </br>
 
 $$
-\frac{\partial \phi}{\partial x} = \frac{\partial \sigma}{\partial z} \frac{\partial z}{\partial x}, \: z = xW^T + B
+\frac{\partial \phi}{\partial x} = \frac{\partial \sigma}{\partial z} \frac{\partial z}{\partial x},\qquad z = xW^T + B
 $$
 </br>
 </br>
@@ -537,7 +537,7 @@ os.system('git add backpropagation_numpy_files/')
     [NbConvertApp] Making directory backpropagation_numpy_files
     [NbConvertApp] Making directory backpropagation_numpy_files
     [NbConvertApp] Making directory backpropagation_numpy_files
-    [NbConvertApp] Writing 13665 bytes to backpropagation_numpy.md
+    [NbConvertApp] Writing 14127 bytes to backpropagation_numpy.md
 
 
 
