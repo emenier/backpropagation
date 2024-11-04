@@ -1,6 +1,5 @@
 # Adjoint Backpropagation
 
-Possibly the most inefficient backpropagation implementation you'll see.
 
 The notebook implements backpropagation through the weights of a Multi Layer Perceptron following the adjoint equations. These equations are a general framework for the computation of a gradient through sequential operations.
 
